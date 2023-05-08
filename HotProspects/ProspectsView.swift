@@ -106,28 +106,21 @@ struct ProspectsView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(filteredProspects) { prospect in
-                    VStack(alignment: .leading) {
-                        Text(prospect.name)
-                            .font(.headline)
-                        Text(prospect.emailAddress)
-                            .foregroundColor(.secondary)
-                    }
-                    .swipeActions {
-                        if prospect.isContacted {
+                Section {
+                    ForEach(filteredProspects) { prospect in
+                        VStack(alignment: .leading) {
+                            Text(prospect.name)
+                                .font(.headline)
+                            Text(prospect.emailAddress)
+                                .foregroundColor(.secondary)
+                        }
+                        .swipeActions {
                             Button {
                                 prospects.toggle(prospect)
                             } label: {
-                                Label("Mark Uncontacted" , systemImage: "person.crop.circle.badge.xmark")
+                                Label(prospect.isContacted ? "Mark Uncontacted" : "Mark Contacted", systemImage: prospect.isContacted ? "person.crop.circle.badge.xmark" : "person.crop.circle.fill.badge.checkmark")
                             }
-                            .tint(.blue)
-                        } else {
-                            Button {
-                                prospects.toggle(prospect)
-                            } label: {
-                                Label("Mark Contacted" , systemImage: "person.crop.circle.fill.badge.checkmark")
-                            }
-                            .tint(.green)
+                            .tint(prospect.isContacted ? .blue : .green)
                             
                             Button {
                                 addNotification(for: prospect)
@@ -139,23 +132,20 @@ struct ProspectsView: View {
                     }
                 }
             }
-                .navigationTitle(title)
-                .toolbar {
-                    Button {
-                        isShowingScanner = true
-                    } label: {
-                        Label("Scan", systemImage: "qrcode.viewfinder")
-                    }
-                    
-///                    An array of the types of codes we want to scan. We’re only scanning QR codes in this app so [.qr] is fine, but iOS supports lots of other types too.
-///                    A string to use as simulated data. Xcode’s simulator doesn’t support using the camera to scan codes, so CodeScannerView automatically presents a replacement UI so we can still test that things work. This replacement UI will automatically send back whatever we pass in as simulated data.
-///                   A completion function to use. This could be a closure, but we just wrote the handleScan() method so we’ll use that.
-              
-                    }.sheet(isPresented: $isShowingScanner) {
+            .navigationTitle(title)
+            .toolbar {
+                Button(action: {
+                    isShowingScanner = true
+                }) {
+                    Label("Scan", systemImage: "qrcode.viewfinder")
+                }
+                .sheet(isPresented: $isShowingScanner) {
                     CodeScannerView(codeTypes: [.qr], simulatedData: "Yashraj Jadhav\nyashrajjadhav@gmail.com" , completion: handleScan)
                 }
+            }
         }
     }
+
 }
 
 struct ProspectsView_Previews: PreviewProvider {

@@ -42,26 +42,43 @@ struct MeView: View {
         qrCode = generateQRcode(from: "\(name)\n\(emailAddress)")
     }
     
-    var body: some View {
-        
-        NavigationView{
-            Form {
-                ///textContentType() – it tells iOS what kind of information we’re asking the user for. This should allow iOS to provide autocomplete data on behalf of the user, which makes the app nicer to use.
-                TextField("Name", text: $name)
-                    .textContentType(.name)
-                    .font(.title)
+     var body: some View {
+        NavigationView {
+            VStack {
                 
-                TextField("Email address", text: $emailAddress)
-                    .textContentType(.emailAddress)
-                    .font(.title)
-                
+                Text("Your Code")
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundColor(.white)
+                Spacer()
                 Image(uiImage: qrCode)
                     .interpolation(.none)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 200 , height: 200)
-                    .contextMenu{
-                        
+                    .frame(width: 300, height: 300)
+                    .cornerRadius(29)
+                    .padding()
+                    .shadow(radius: 20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray, lineWidth: 0)
+                    )
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(
+                                colors: [
+                                    Color.gray.opacity(0.5),
+                                    Color.gray.opacity(0.2)
+                                ]
+                            ),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .cornerRadius(29)
+                        .padding(2)
+                        .shadow(radius: 20)
+                    )
+                    .contextMenu {
                         Button {
                             let imageSaver = ImageSaver()
                             imageSaver.writeToPhotoAlbum(image: qrCode)
@@ -69,17 +86,34 @@ struct MeView: View {
                             Label("Save to Photos", systemImage: "square.and.arrow.down")
                         }
                     }
+
+               // Spacer()
+                TextField("Name", text: $name)
+                    .textContentType(.name)
+                    .font(.title2)
+                    .padding()
+                    .background(Color.gray)
+                    .cornerRadius(20)
+                    .padding(.horizontal)
+                
+                TextField("Email address", text: $emailAddress)
+                    .textContentType(.emailAddress)
+                    .font(.title2)
+                    .padding()
+                    .background(Color.gray)
+                    .cornerRadius(20)
+                    .padding(.horizontal)
+
+               Spacer()
             }
-            .navigationTitle("Your code")
+            .background(Color.white)
+            .ignoresSafeArea()
             .onAppear(perform: updateCode)
             .onChange(of: name) { _ in updateCode() }
             .onChange(of: emailAddress) { _ in updateCode() }
-            
-            
         }
-        
-        
     }
+
 }
 
 class ImageSaver: NSObject {
