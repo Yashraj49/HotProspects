@@ -42,77 +42,75 @@ struct MeView: View {
         qrCode = generateQRcode(from: "\(name)\n\(emailAddress)")
     }
     
-     var body: some View {
-        NavigationView {
-            VStack {
-                
-                Text("Your Code")
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundColor(.white)
-                Spacer()
-                Image(uiImage: qrCode)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300, height: 300)
-                    .cornerRadius(29)
-                    .padding()
-                    .shadow(radius: 20)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray, lineWidth: 0)
-                    )
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(
-                                colors: [
-                                    Color.gray.opacity(0.5),
-                                    Color.gray.opacity(0.2)
-                                ]
-                            ),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        .cornerRadius(29)
-                        .padding(2)
-                        .shadow(radius: 20)
-                    )
-                    .contextMenu {
-                        Button {
-                            let imageSaver = ImageSaver()
-                            imageSaver.writeToPhotoAlbum(image: qrCode)
-                        } label: {
-                            Label("Save to Photos", systemImage: "square.and.arrow.down")
-                        }
-                    }
-
-               // Spacer()
-                TextField("Name", text: $name)
-                    .textContentType(.name)
-                    .font(.title2)
-                    .padding()
-                    .background(Color.gray)
-                    .cornerRadius(20)
-                    .padding(.horizontal)
-                
-                TextField("Email address", text: $emailAddress)
-                    .textContentType(.emailAddress)
-                    .font(.title2)
-                    .padding()
-                    .background(Color.gray)
-                    .cornerRadius(20)
-                    .padding(.horizontal)
-
-               Spacer()
-            }
-            .background(Color.white)
-            .ignoresSafeArea()
-            .onAppear(perform: updateCode)
-            .onChange(of: name) { _ in updateCode() }
-            .onChange(of: emailAddress) { _ in updateCode() }
-        }
-    }
+         var body: some View {
+           NavigationView {
+               VStack {
+                   Spacer()
+                   Text("Your Code")
+                       .font(.largeTitle)
+                       .bold()
+                       .foregroundColor(.black)
+                       .padding()
+                   Image(uiImage: qrCode)
+                       .interpolation(.none)
+                       .resizable()
+                       .scaledToFit()
+                       .frame(width: 300, height: 300)
+                       .cornerRadius(29)
+                       .padding()
+                       .shadow(radius: 20)
+                       .background(
+                           RoundedRectangle(cornerRadius: 29)
+                               .stroke(Color.gray, lineWidth: 2)
+                               .background(
+                                   LinearGradient(
+                                       gradient: Gradient(
+                                           colors: [
+                                               Color.gray.opacity(0.5),
+                                               Color.gray.opacity(0.2)
+                                           ]
+                                       ),
+                                       startPoint: .topLeading,
+                                       endPoint: .bottomTrailing
+                                   )
+                                   .cornerRadius(29)
+                                   .shadow(radius: 20)
+                               )
+                       )
+                       .contextMenu {
+                           Button {
+                               let imageSaver = ImageSaver()
+                               imageSaver.writeToPhotoAlbum(image: qrCode)
+                           } label: {
+                               Label("Save to Photos", systemImage: "square.and.arrow.down")
+                           }
+                       }
+                   TextField("Name", text: $name)
+                       .textContentType(.name)
+                       .font(.title2)
+                       .padding()
+                       .background(Color.gray.opacity(0.3))
+                       .cornerRadius(20)
+                       .padding(.horizontal)
+                       .padding(.vertical)
+                   TextField("Email address", text: $emailAddress)
+                       .textContentType(.emailAddress)
+                       .font(.title2)
+                       .padding()
+                       .background(Color.gray.opacity(0.3))
+                       .cornerRadius(20)
+                       .padding(.horizontal)
+                   Spacer()
+               }
+               .padding()
+               .background(Color.white)
+               .ignoresSafeArea()
+               .onAppear(perform: updateCode)
+               .onChange(of: name) { _ in updateCode() }
+               .onChange(of: emailAddress) { _ in updateCode() }
+               //.navigationBarTitle("QR Code", displayMode: .inline)
+           }
+       }
 
 }
 
