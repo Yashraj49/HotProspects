@@ -109,8 +109,18 @@ struct ProspectsView: View {
                 Section {
                     ForEach(filteredProspects) { prospect in
                         VStack(alignment: .leading) {
-                            Text(prospect.name)
-                                .font(.headline)
+                            HStack{
+                                Text(prospect.name)
+                                    .font(.headline)
+                                Spacer()
+                                if prospect.isContacted {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                } else {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                            }
                             Text(prospect.emailAddress)
                                 .foregroundColor(.secondary)
                         }

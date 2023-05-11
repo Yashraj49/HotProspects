@@ -22,33 +22,64 @@ class Prospect : Identifiable , Codable {
 }
 
 @MainActor class Prospects : ObservableObject {
-
+    
     /// we can use access control to stop external writes to the people array, meaning that our views must use the add() method to add prospects
     
     @Published private(set) var people : [Prospect]
-    let saveKey = "SaveData"
-  //*  This time our data is stored using a slightly easier format: although the Prospects class uses the @Published property wrapper, the people array inside it is simple enough that it already conforms to Codable just by adding the protocol conformance. So, we can get most of the way to our goal by making three small changes:
-     
+   static let saveKey = "SaveData"
+    //*  This time our data is stored using a slightly easier format: although the Prospects class uses the @Published property wrapper, the people array inside it is simple enough that it already conforms to Codable just by adding the protocol conformance. So, we can get most of the way to our goal by making three small changes:
+    
     /* Updating the Prospects initializer so that it loads its data from UserDefaults where possible.
      Adding a save() method to the same class, writing the current data to UserDefaults.
      Calling save() when adding a prospect or toggling its isContacted property.*/
     
     init() {
-        if let data = UserDefaults.standard.data(forKey: saveKey) {
+        
+        self.people = []
+        
+        if let data = loadFile(){
             if let decoded = try? JSONDecoder().decode([Prospect].self, from: data) {
-                people = decoded
+                self.people = decoded
                 return
             }
         }
-
-        people = []
+        
+       
     }
     
-   private func save() {
+
+    ///    used to retrieve an array of URLs for the user's documents directory. Since there can be more than one document directory, the .userDomainMask parameter specifies that we want the URL for the user's home directory. The function returns the first URL in the array.
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
+    }
+    
+    private func save() {
         if let encoded = try? JSONEncoder().encode(people) {
-            UserDefaults.standard.set(encoded, forKey: saveKey)
+            saveDataToDocuments(encoded)
+            
         }
     }
+    
+    func saveDataToDocuments(_ data : Data , jsonfilename : String = "myJson.JSON") {
+        let JsonfileURL = getDocumentsDirectory().appendingPathComponent(Self.saveKey)
+        
+        do {
+            try data.write(to: JsonfileURL , options: [.atomicWrite , .completeFileProtection])
+        } catch {
+            print("Could Not write data = \(error.localizedDescription)")
+        }
+            
+    }
+    
+    private func loadFile() -> Data? {
+        let url = getDocumentsDirectory().appendingPathComponent(Self.saveKey)
+        if let data = try? Data(contentsOf: url){
+            return data
+        }
+        return nil
+    }
+    
 //    In practical terms, this means rather than writing prospects.people.append(person) we’d instead create an add() method on the Prospects class, so we could write code like this: prospects.add(person). 
     func add(_ prospect: Prospect) {
         people.append(prospect)
