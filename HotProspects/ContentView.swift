@@ -16,9 +16,9 @@ enum contactStatus {
 }
 
 
+
 struct ContentView: View {
-    
-    
+        
     
     @StateObject var prospects = Prospects()
     

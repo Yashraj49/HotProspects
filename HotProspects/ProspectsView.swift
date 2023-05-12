@@ -9,15 +9,22 @@ import SwiftUI
 import CodeScanner
 import UserNotifications
 
+enum SortType {
+    case name, recent
+}
 
 struct ProspectsView: View {
     @State private var isShowingScanner = false
-  
+    @State private var isShowingSortOptions = false
+     @State var sort: SortType = .name
+    
+
     /// Important: When you use @EnvironmentObject you are explicitly telling SwiftUI that your object will exist in the environment by the time the view is created. If it isn’t present, your app will crash immediately – be careful, and treat it like an implicitly unwrapped optional.
     
     
     @EnvironmentObject var prospects: Prospects
     
+ 
     func handleScan(result : Result<ScanResult, ScanError>) {
         isShowingScanner = false
         switch result {
@@ -85,7 +92,11 @@ struct ProspectsView: View {
         }
     }
     
+  
+
+    
 ///    When filter() runs, it passes every element in the people array through our test. So, $0.isContacted means “does the current element have its isContacted property set to true?” All items in the array that pass that test – that have isContacted set to true – will be added to a new array and sent back from filteredResults. And when we use !$0.isContacted we get the opposite: only prospects that haven’t been contacted get included.
+    
     
     var filteredProspects: [Prospect] {
         switch filter {
@@ -107,7 +118,7 @@ struct ProspectsView: View {
         NavigationView {
             List {
                 Section {
-                    ForEach(filteredProspects) { prospect in
+                    ForEach(filteredSortedProspects) { prospect in
                         VStack(alignment: .leading) {
                             HStack{
                                 Text(prospect.name)
@@ -147,13 +158,46 @@ struct ProspectsView: View {
                 Button(action: {
                     isShowingScanner = true
                 }) {
-                    Label("Scan", systemImage: "qrcode.viewfinder")
+                   
                 }
                 .sheet(isPresented: $isShowingScanner) {
                     CodeScannerView(codeTypes: [.qr], simulatedData: "Yashraj Jadhav\nyashrajjadhav@gmail.com" , completion: handleScan)
                 }
-            }
+                .actionSheet(isPresented: $isShowingSortOptions) {
+                    ActionSheet(title: Text("Sort by"), buttons: [
+                        .default(Text((self.sort == .name ? "✓ " : "") + "Name"), action: { self.sort = .name }),
+                        .default(Text((self.sort == .recent ? "✓ " : "") + "Most recent"), action: { self.sort = .recent }),
+                    ])
+                }}
+                .navigationBarTitle(title)
+                .navigationBarItems(leading: Button("Sort") {
+                        self.isShowingSortOptions = true
+                    }, trailing: Button(action: {
+                        self.isShowingScanner = true
+                    }) {
+                        Image(systemName: "qrcode.viewfinder")
+                        Text("Scan")
+                    }
+)
+            
         }
+    }
+    
+    typealias SortComparator<T> = (T, T) -> Bool
+    
+    var filteredSortedProspects: [Prospect] {
+        switch sort {
+        case .name:
+            return filteredProspects.sorted(by: { (prospect1: Prospect, prospect2: Prospect) -> Bool in
+                prospect1.name < prospect2.name
+            })
+        case .recent:
+            return filteredProspects.sorted(by: { (prospect1: Prospect, prospect2: Prospect) -> Bool in
+                prospect1.date > prospect2.date
+            })
+      
+        }
+        
     }
 
 }
